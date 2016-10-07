@@ -4,3 +4,9 @@ Our project will focus on 3D photography. More specifically, we will use an LP35
 Implementation based on the following paper:
 
 Brink, Willie, Alan Robinson, and Marcos A. Rodrigues. "Indexing Uncoded Stripe Patterns in Structured Light Systems by Maximum Spanning Trees." BMVC. 2008.
+
+An example on how to run the code getStripes.m:
+
+ ```
+getStripes('../data/buddha_statue/img_1.JPG');
+```
