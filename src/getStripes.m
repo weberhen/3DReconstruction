@@ -12,7 +12,9 @@ function [stripes_img] = getStripes(input_img_name)
  %convert to grayscale
  input_img = rgb2gray(input_img);
  
- f = @(x) (x(2,2) > x(1,2) && x(2,2) > x(3,2))*255;
+ % function to recover the stripes
+ % A(r, c) > A(r − 1,c) and A(r, c) > A(r + 1,c)
+ f = @(x) (x(2,2) > x(1,2) && x(2,2) > x(3,2)) * 255;
  
  stripes_img  = nlfilter(input_img,[3 3],f);
    
