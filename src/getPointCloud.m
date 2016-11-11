@@ -1,5 +1,5 @@
 %function [point_cloud] =  getPointCloud(indexed_stripes_img, Dp, W, Ds, P, k)
-function [point_cloud] =  getPointCloud() 
+function [point_cloud] =  getPointCloud(Dp, W, Ds, P) 
 % Dp: the distance between the projector and the system origin  % W:  the width between successive stripes on the calibration plane  
 % Ds: the distance between the camera and the projector  
 % P: the pixel size on the sensor plane of the camera  
@@ -60,7 +60,9 @@ array_ind_stripe_index={ind_stripe_index1,ind_stripe_index2,ind_stripe_index3,in
 final_index_image=zeros(size(yellow_img));
 final_index_image = uint8(final_index_image);
 
-for i=1:11
+nStripes = 11;
+
+for i=1:nStripes
     array_ind_stripe_index{i}=uint8(array_ind_stripe_index{i});
     
     i_yellow_stripe = yellow_img.*array_ind_stripe_index{i};
@@ -69,18 +71,57 @@ for i=1:11
    
 end
 
-imtool(final_index_image);
+imtool(final_index_image*255);
 
 imwrite(final_index_image, 'our_index_stripes.png');
 
-%ind_stripe_index1 = uint8(ind_stripe_index1);
+%using the real indexes
+real_index = [4 11 18 25 32 39 -3 -10 -17 -24 -31]
 
-%imshow(ind_stripe_index1*255);
-%figure;
-%first_yellow_stripe = yellow_img.*ind_stripe_index1;
+N = size(final_index_image, 2); %column
+M = size(final_index_image, 1); %line
 
-%final_index_image=zeros(size(yellow_img));
-%final_index_image(first_yellow_stripe(:,:,1)~=0)=1;
-%imshow(final_index_image*255);
+nPoints = 0;
+x = [];
+y = [];
+z = [];
+%index(row,column)
+for r=1:M
+   for c=1:N
+       if(final_index_image(r,c) ~= 0)
+           Wn = real_index(final_index_image(r,c)) * W;
+           u = r - 0.5*(M+1);
+           h = c - 0.5*(N+1);
+           
+           x(end+1) = Dp - (Dp*Ds)/(u*P*Dp + Wn);
+           y(end+1) = (h*P*Dp*Ds)/(u*P*Dp + Wn);
+           z(end+1) = (Wn*Ds)/(u*P*Dp + Wn);
+           
+           %fprintf(fileID,'%f %f %f\n',x,y,z);
+           nPoints = nPoints + 1;
+       end
+   end
+end
+
+pcshow([x(:),y(:),z(:)]);
+
+fileID = fopen('face_3D_cloud.pcd','w');
+fprintf(fileID,'# .PCD v.7 - Point Cloud Data file format\n');
+fprintf(fileID,'VERSION .7\n');
+fprintf(fileID,'FIELDS x y z\n');
+fprintf(fileID,'SIZE 4 4 4\n');
+fprintf(fileID,'TYPE F F F\n');
+fprintf(fileID,'COUNT 1 1 1\n');
+fprintf(fileID,'WIDTH %d\n',nPoints);
+fprintf(fileID,'HEIGHT 1\n');
+fprintf(fileID,'VIEWPOINT 0 0 0 1 0 0 0\n');
+fprintf(fileID,'POINTS %d\n',nPoints);
+fprintf(fileID,'DATA ascii\n');
+
+for i=1:nPoints
+    fprintf(fileID,'%f %f %f\n',x(i),y(i),z(i));
+end
+
+fclose(fileID);
 
 end
