@@ -10,3 +10,9 @@ An example on how to run the code getStripes.m:
  ```
 getStripes('../data/buddha_statue/img_1.JPG');
 ```
+
+An example on how to run the code getPointCloud.m 
+
+```
+getPointCloud(790,3.08,61,0.0006)
+```
