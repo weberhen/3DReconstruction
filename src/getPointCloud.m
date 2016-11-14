@@ -6,15 +6,18 @@ function [point_cloud] =  getPointCloud(Dp, W, Ds, P)
 % k: the radial lens distortion coefficient 
 % getPointCloud(indexed_stripes_img)  given the image with the indexed stripes, do the triangulation to recover the 3D location of each point in the image
 
-%get stripe indexes
+delete v_h.txt
+delete face_3D_cloud.pcd
 
-%Get coordinates v & h
-
-%Get coordinates x , y,z of the object surface
-
-a = imread('../data/face/indexed_stripes_img.png');
+a = imread('../data/face/indexed_stripes_img_scaled.png');
 b = imread('../data/face/binarystripes.png');
+
+%a = imresize(a, [768 576]); 
+%b = imresize(b, [768 576]); 
+%imtool(a);
 b = b/255;
+
+%imtool(b*255);
 c = a.*repmat(b,[1,1,3]);
 
 %filtering the image to get only the yellow colour
@@ -43,17 +46,30 @@ ind_stripe_index9= zeros(size(yellow_img));
 ind_stripe_index10= zeros(size(yellow_img));
 ind_stripe_index11= zeros(size(yellow_img));
 
-ind_stripe_index1(1:38,:,:) = 1; 
-ind_stripe_index2(38:74,:,:) = 1; 
-ind_stripe_index3(74:108,:,:) = 1; 
-ind_stripe_index4(108:135,:,:) = 1; 
-ind_stripe_index5(135:167,:,:) = 1; 
-ind_stripe_index6(167:201,:,:) = 1; 
-ind_stripe_index7(201:225,:,:) = 1; 
-ind_stripe_index8(225:255,:,:) = 1; 
-ind_stripe_index9(255:283,:,:) = 1; 
-ind_stripe_index10(283:309,:,:) = 1; 
-ind_stripe_index11(309:331,:,:) = 1; 
+% ind_stripe_index1(1:90,:,:) = 1; 
+% ind_stripe_index2(91:157,:,:) = 1; 
+% ind_stripe_index3(158:230,:,:) = 1; 
+% ind_stripe_index4(231:298,:,:) = 1; 
+% ind_stripe_index5(299:371,:,:) = 1; 
+% ind_stripe_index6(372:445,:,:) = 1; 
+% ind_stripe_index7(446:499,:,:) = 1; 
+% ind_stripe_index8(500:565,:,:) = 1; 
+% ind_stripe_index9(566:626,:,:) = 1; 
+% ind_stripe_index10(627:686,:,:) = 1; 
+% ind_stripe_index11(687:731,:,:) = 1; 
+
+ind_stripe_index1(1:54,:,:) = 1; 
+ind_stripe_index2(55:118,:,:) = 1; 
+ind_stripe_index3(119:180,:,:) = 1; 
+ind_stripe_index4(181:230,:,:) = 1; 
+ind_stripe_index5(231:295,:,:) = 1; 
+ind_stripe_index6(296:354,:,:) = 1; 
+ind_stripe_index7(355:396,:,:) = 1; 
+ind_stripe_index8(397:447,:,:) = 1; 
+ind_stripe_index9(448:496,:,:) = 1; 
+ind_stripe_index10(497:543,:,:) = 1; 
+ind_stripe_index11(544:578,:,:) = 1; 
+
 
 array_ind_stripe_index={ind_stripe_index1,ind_stripe_index2,ind_stripe_index3,ind_stripe_index4,ind_stripe_index5,ind_stripe_index6,ind_stripe_index7,ind_stripe_index8,ind_stripe_index9,ind_stripe_index10,ind_stripe_index11};
     
@@ -71,15 +87,17 @@ for i=1:nStripes
    
 end
 
-imtool(final_index_image*255);
+%imtool(final_index_image*255);
 
 imwrite(final_index_image, 'our_index_stripes.png');
 
 %using the real indexes
-real_index = [4 11 18 25 32 39 -3 -10 -17 -24 -31]
-
+%real_index = [39 32 25 18 11 4 3 10 17 24 31];
+real_index = [ 48 41 34 27 20 13 6 -1 -8 -15 -22 ];
 N = size(final_index_image, 2); %column
 M = size(final_index_image, 1); %line
+
+fileID_v_u = fopen('v_h.txt','w');
 
 nPoints = 0;
 x = [];
@@ -93,17 +111,21 @@ for r=1:M
            u = r - 0.5*(M+1);
            h = c - 0.5*(N+1);
            
-           x(end+1) = Dp - (Dp*Ds)/(u*P*Dp + Wn);
+           %x(end+1) = Dp - (Dp*Ds)/(u*P*Dp + Wn);
+           
            y(end+1) = (h*P*Dp*Ds)/(u*P*Dp + Wn);
            z(end+1) = (Wn*Ds)/(u*P*Dp + Wn);
+           x(end+1) = Dp - (Dp * z(end))/Wn;
            
-           %fprintf(fileID,'%f %f %f\n',x,y,z);
+           fprintf(fileID_v_u,'%f %f %f %f\n',h,u,c,r);
            nPoints = nPoints + 1;
        end
    end
 end
 
-pcshow([x(:),y(:),z(:)]);
+fclose(fileID_v_u);
+
+%pcshow([x(:),y(:),z(:)]);
 
 fileID = fopen('face_3D_cloud.pcd','w');
 fprintf(fileID,'# .PCD v.7 - Point Cloud Data file format\n');

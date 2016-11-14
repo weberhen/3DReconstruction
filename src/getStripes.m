@@ -3,8 +3,10 @@ function [stripes_img] = getStripes(input_img_name)
  %load input_image
  input_img = imread(input_img_name);
  
+ input_img = imresize(input_img, 1.75); 
+ 
  %resize input_imgimage
- input_img = imresize(input_img,.4);
+ %input_img = imresize(input_img,.4);
  
  %create stripes_img with the same size as the input
  stripes_img = zeros(size(input_img));
@@ -19,6 +21,8 @@ function [stripes_img] = getStripes(input_img_name)
  stripes_img  = nlfilter(input_img,[3 3],f);
    
  imshow(stripes_img);
+ 
+ imwrite(stripes_img,'../data/face/binarystripes.png');
  
  
 end
