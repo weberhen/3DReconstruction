@@ -6,18 +6,82 @@ function [point_cloud] =  getPointCloud(Dp, W, Ds, P)
 % k: the radial lens distortion coefficient 
 % getPointCloud(indexed_stripes_img)  given the image with the indexed stripes, do the triangulation to recover the 3D location of each point in the image
 
+    prompt = 'Projector width dimension (pWidth):';
+    pWidth = input(prompt);
+    prompt = 'Projector height dimension (pHeight):';
+    pHeight = input(prompt);
+    
+    stripeSize = 4;
+    distanceBetweenStripes=4;
+    
+    hFig = figure('Name','APP',...
+        'Numbertitle','off',...
+        'Position', [0 0 pWidth pHeight],...
+        'WindowStyle','modal',...
+        'Color',[0.5 0.5 0.5],...
+        'Toolbar','none');
+    img = ones(pHeight, pWidth)*255;
+    for i = 1:stripeSize+distanceBetweenStripes:size(img,1)
+        img(i:i+stripeSize,:) = 0;
+    end
+    fpos = get(hFig,'Position');
+    axOffset = (fpos(3:4)-[size(img,2) size(img,1)])/2;
+    ha = axes('Parent',hFig,'Units','pixels',...
+                'Position',[axOffset size(img,2) size(img,1)]);
+    hImshow = imshow(img,'Parent',ha);
+
+    if nargin < 4
+        prompt = 'Height of projection (in mm): ';
+        projectionHeight = input(prompt);
+        prompt = 'Distance Projector-Background (Dp):';
+        Dp = input(prompt);
+        %prompt = 'Width between successive stripes on the calibration plane (W):';
+        %W = input(prompt);
+        W = projectionHeight/(stripeSize+distanceBetweenStripes);
+        prompt = 'The distance between the camera and the projector (Ds):';
+        Ds = input(prompt);
+        prompt = 'The pixel size on the sensor plane of the camera (P):';
+        P = input(prompt);
+    %     Dp = 790;
+    %     W  = 3.68;
+    %     Ds = 61;
+    %     P  = 0.0006;
+    end
+
 delete v_h.txt
 delete face_3D_cloud.pcd
 
 a = imread('../data/face/indexed_stripes_img_scaled.png');
 b = imread('../data/face/binarystripes.png');
 
-%a = imresize(a, [768 576]); 
-%b = imresize(b, [768 576]); 
-%imtool(a);
 b = b/255;
 
-%imtool(b*255);
+hFig = figure('Name','APP',...
+    'Numbertitle','off',...
+    'Position', [0 0 pWidth pHeight],...
+    'WindowStyle','modal',...
+    'Color',[0.5 0.5 0.5],...
+    'Toolbar','none');
+img = zeros(pHeight, pWidth);
+size(img)
+%img = imresize(img, [pHeight pWidth ]);
+fpos = get(hFig,'Position');
+axOffset = (fpos(3:4)-[size(img,2) size(img,1)])/2;
+ha = axes('Parent',hFig,'Units','pixels',...
+            'Position',[axOffset size(img,2) size(img,1)]);
+
+adjustScreen = false;
+for i = 1:stripeSize+distanceBetweenStripes:size(img,1)
+    if adjustScreen ~= true
+        k=waitforbuttonpress();
+        adjustScreen = true;
+    end
+   img=img+255;
+   img(i:i+stripeSize,:) = 0;
+   imshow(img,'Parent',ha);
+   pause(0.1);
+end
+
 c = a.*repmat(b,[1,1,3]);
 
 %filtering the image to get only the yellow colour
