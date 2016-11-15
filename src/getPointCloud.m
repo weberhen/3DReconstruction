@@ -35,9 +35,9 @@ function [point_cloud] =  getPointCloud(Dp, W, Ds, P)
         projectionHeight = input(prompt);
         prompt = 'Distance Projector-Background (Dp):';
         Dp = input(prompt);
-        %prompt = 'Width between successive stripes on the calibration plane (W):';
-        %W = input(prompt);
-        W = projectionHeight/(stripeSize+distanceBetweenStripes);
+        prompt = 'Width between successive stripes on the calibration plane (W):';
+        W = input(prompt);
+        %W = projectionHeight/(stripeSize+distanceBetweenStripes);
         prompt = 'The distance between the camera and the projector (Ds):';
         Ds = input(prompt);
         prompt = 'The pixel size on the sensor plane of the camera (P):';
@@ -157,7 +157,9 @@ imwrite(final_index_image, 'our_index_stripes.png');
 
 %using the real indexes
 %real_index = [39 32 25 18 11 4 3 10 17 24 31];
+scale = 100;
 real_index = [ 48 41 34 27 20 13 6 -1 -8 -15 -22 ];
+
 N = size(final_index_image, 2); %column
 M = size(final_index_image, 1); %line
 
@@ -171,7 +173,7 @@ z = [];
 for r=1:M
    for c=1:N
        if(final_index_image(r,c) ~= 0)
-           Wn = real_index(final_index_image(r,c)) * W;
+           Wn = scale+real_index(final_index_image(r,c)) * W;
            u = r - 0.5*(M+1);
            h = c - 0.5*(N+1);
            

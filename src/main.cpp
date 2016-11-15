@@ -215,3 +215,158 @@ int main( int argc, char* argv[] )
     // the camera will be deinitialized automatically in VideoCapture destructor
     return 0;
 }
+
+
+/*
+// My first OpenCV code
+//
+
+#include <opencv2/opencv.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
+
+#include <iostream>
+#include <fstream>
+#include <string>
+using namespace cv;
+using namespace std;
+int main(int argc, char** argv)
+{
+
+    //project stripes
+    int pWidth, pHeight;
+    cout<<"Projector width dimension (pWidth):"<<endl;
+    cin >> pWidth;
+    cout<<"Projector height dimension (pHeight):"<<endl;
+    cin >> pHeight;
+
+    int stripeSize = 4;
+    int distanceBetweenStripes=4;
+
+    Mat imgStripe(pHeight,pWidth,CV_8UC1, Scalar(255));
+    for (int i = 0; i < pHeight-stripeSize; i+=(distanceBetweenStripes+stripeSize))
+    {
+        for(int k=0;k<stripeSize;k++)
+        {
+            for (int j = 0; j < pWidth; j++)
+            {
+                imgStripe.at<uchar>(i+k,j) = 0;
+            }    
+        }
+    }
+    imshow("imgStripe",imgStripe);
+    waitKey();
+
+    //get system parameters
+    // Dp: Distance between the projector and the system origin 
+    // Ds: Distance between the camera and the projector  
+    // P:  Pixel size on the sensor plane of the camera  
+    // W:  Width between successive stripes on the calibration plane 
+    // k:  Radial lens distortion coefficient 
+    
+    
+
+
+
+
+    //get image from the camera
+
+    //get line and calculate point cloud
+
+
+
+
+
+    //////////////////////////////////////////////////////////////////
+
+    string imageName("our_index_stripes.png"); // by default
+    if (argc > 1)
+    {
+        imageName = argv[1];
+    }
+    Mat image;
+    image = imread(imageName.c_str()); // Read the file
+    cv::cvtColor(image, image, CV_BGR2GRAY);
+
+    if (image.empty())                      // Check for invalid input
+    {
+        cout << "Could not open or find the image" << std::endl;
+        return -1;
+    }
+    int scale = 100;
+    //vector<int>real_index = { 39, 32, 25, 18, 11, 4, -3, -10, -17, -24, -31 };
+    vector<int>real_index = { 48, 41, 34, 27, 20, 13, 6, -1, -8, -15, -22 };
+
+//    vector<int>real_index = { 100,99,98,97,96,95,94,93,92,91,90 };
+   
+    //getPointCloud(790,3.08,61,0.0006)
+    double W=4.78, Dp=790, Ds=61, P=0.0006;
+    double M = image.rows;
+    double N = image.cols;
+    vector<double>x, y, z;
+
+    for (int i = 0; i < image.rows; i++)
+    {
+        for (int j = 0; j < image.cols; j++)
+        {
+            if (image.at<uchar>(i, j) != 0)
+            {
+cout<<(int)image.at<uchar>(i, j)<<endl;
+
+                double Wn = scale + real_index[(int)image.at<uchar>(i, j)-1] * W;
+
+                double u = i - 0.5*(M + 1);
+                double h = j - 0.5*(N + 1);
+
+                x.push_back(Dp - ((Dp*Ds) / (u*P*Dp + Wn)));
+                y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
+                z.push_back((Wn*Ds) / (u*P*Dp + Wn));
+
+
+                cout<<Dp<<" "
+                    <<W<<" "
+                    <<Ds<<" "
+                    <<P<<" "
+                    <<Wn<<" "
+                    <<u<<" "
+                    <<h<<" "
+                    <<i<<" "
+                    <<j<<" "
+                    <<x.at(x.size()-1)<<" "
+                    <<y.at(x.size()-1)<<" "
+                    <<z.at(x.size()-1)<<endl;
+            }
+        }
+    }
+
+
+    string outFilename = "face3dpointcloud.pcd";
+    ofstream outFile(outFilename.c_str());
+
+    if (!outFile)
+    {
+        cerr << "Error opening output file: " << outFilename << "!" << endl;
+        exit(1);
+    }
+
+    outFile << "# .PCD v.7 - Point Cloud Data file format" << endl;
+    outFile << "VERSION .7" << endl;
+    outFile << "FIELDS x y z " << endl;
+    outFile << "SIZE 4 4 4 " << endl;
+    outFile << "TYPE F F F " << endl;
+    outFile << "COUNT 1 1 1 " << endl;
+    outFile << "WIDTH " << x.size() << endl;
+    outFile << "HEIGHT 1" << endl;
+    //outFile << "VIEWPOINT 0 0 0 1 0 0 0" << endl;
+    outFile << "POINTS " << x.size() << endl;
+    outFile << "DATA ascii" << endl;
+
+    for (int i = 0; i < x.size(); i++)
+        outFile << x[i] <<" "<< y[i]<<" " << z[i] << endl;
+
+    return 0;
+}
+
+*/
