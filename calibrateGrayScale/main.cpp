@@ -23,7 +23,7 @@ char* window_name = "Threshold Demo";
 char* trackbar_type = "Type: \n 0: Binary \n 1: Binary Inverted \n 2: Truncate \n 3: To Zero \n 4: To Zero Inverted";
 char* trackbar_value = "Value";
 
-//#define USINGKINECT 1
+#define USINGKINECT 1
 #define TESTING 1
 
 /**
@@ -49,9 +49,11 @@ int main( int argc, char* argv[] )
 
     //get image from the camera
 #ifdef USINGKINECT
-    VideoCapture capture(CV_CAP_OPENNI); // I have tried with capture(0), capture(1)
+    VideoCapture capture(CV_CAP_OPENNI); 
+    cout<<"Using Kinect"<<endl;
 #else
     VideoCapture capture(0);
+    cout<<"Using Webcam"<<endl;
 #endif
 
     if(!(capture.isOpened())){
@@ -66,17 +68,15 @@ int main( int argc, char* argv[] )
 
 #ifdef USINGKINECT
         capture.grab();
-        capture.retrieve( bgrImage, CV_CAP_OPENNI_GRAY_IMAGE );
+        capture.retrieve( src_gray, CV_CAP_OPENNI_GRAY_IMAGE );
 #else
         capture >> src;
+        /// Convert the image to Gray
+        cvtColor( src, src_gray, CV_BGR2GRAY );
 #endif        
         
         if(waitKey(30) >= 0) 
-            break;
-
-
-        /// Convert the image to Gray
-        cvtColor( src, src_gray, CV_BGR2GRAY );
+            break;        
 
         /// Create a window to display results
         namedWindow( window_name, CV_WINDOW_AUTOSIZE );

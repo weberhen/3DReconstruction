@@ -8,7 +8,7 @@
 using namespace cv;
 using namespace std;
 
-//#define USINGKINECT 1
+#define USINGKINECT 1
 #define TESTING 1
 
 int main( int argc, char* argv[] )
@@ -134,7 +134,6 @@ int main( int argc, char* argv[] )
 #ifdef USINGKINECT
         capture.grab();
         capture.retrieve( bgrImage, CV_CAP_OPENNI_GRAY_IMAGE );
-#else
     #ifdef TESTING
             //bgrImage = imgStripe.clone();
             bgrImage = imread("stripes.jpg");
@@ -143,10 +142,11 @@ int main( int argc, char* argv[] )
             threshold( bgrImage, bgrImage, 127, 255, THRESH_BINARY );
             imshow("bgrImage",bgrImage);
             waitKey();
-    #else
+    #endif
+#else   
             capture >> bgrImage;
             cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
-    #endif
+
 #endif
         double M = bgrImage.rows;
         double N = bgrImage.cols;
