@@ -2,31 +2,39 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-#include <string>
 
+#include <string>
 #include <fstream>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
-//#define USINGKINECT 1
-#define TESTING 1
+#define LOADINGFROMDATASET
 
 int main(int argc, char* argv[])
 {
+	//
+	// defining variables
+	//
 	Mat bgrImage;
 	char command[50];
 	sprintf_s(command, "ConsoleExample.exe ");
+#ifndef LOADINGFROMDATASET
 	string imageName("U://My Pictures//RemotePhoto//IMG_0001.JPG"); // by default
+#else
+	string imageName("C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//53.png"); // by default
+#endif
+#
+
 	char test;
 	bool testValues = false;
+
 	cout << "use test values? y/n" << endl;
 	cin >> test;
 	if (test == 'y')
 		testValues = true;
-	//project stripes
+
 	int pWidth = 1000, pHeight = 630;
 
 	if (!testValues)
@@ -42,6 +50,10 @@ int main(int argc, char* argv[])
 	int nStripes = 0;
 
 	Mat imgStripe(pHeight, pWidth, CV_8UC1, Scalar(255));
+
+	//
+	// project stripes
+	//
 	for (int i = 0; i < pHeight - stripeSize; i += (distanceBetweenStripes + stripeSize))
 	{
 		for (int k = 0; k<stripeSize; k++)
@@ -55,23 +67,22 @@ int main(int argc, char* argv[])
 	}
 	imshow("imgStripe", imgStripe);
 	waitKey();
-	//capture >> bgrImage;
 	
+#ifndef LOADINGFROMDATASET
 	system(command);
 	bgrImage = imread(imageName);
 	resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
 	bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
 	cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
-	imshow("IMAGE FOR CALIBRATION",bgrImage);
-	waitKey();
+#else
+	bgrImage = imread(imageName);
+#endif
+		
 	double projectionHeight = 30;
-	/*if (!testValues)
-	{
-		cout << "Height of projection (in mm):" << endl;
-		cin >> projectionHeight;
-	}*/
-
+	
+	//
 	//get system parameters
+	//
 	// Dp: Distance between the projector and the system origin 
 	// Ds: Distance between the camera and the projector  
 	// P:  Pixel size on the sensor plane of the camera  
@@ -85,6 +96,9 @@ int main(int argc, char* argv[])
 	
 	if (!testValues)
 	{
+		imshow("IMAGE FOR CALIBRATION", bgrImage);
+		waitKey();
+
 		cout << "Distance between the projector and the system origin in inches(Dp):" << endl;
 		cin >> Dp;
 
@@ -112,12 +126,18 @@ int main(int argc, char* argv[])
 	waitKey(3);
 
 	//get image from the camera
+#ifndef LOADINGFROMDATASET
 	system(command);
 	bgrImage = imread(imageName);
+#endif
 
+	bgrImage = imread("C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//0.png");
+	
+#ifndef LOADINGFROMDATASET
 	resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
 	bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
 	cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
+#endif
 
 	Mat canny_img;
 	/// Reduce noise with a kernel 3x3
@@ -129,7 +149,7 @@ int main(int argc, char* argv[])
 	Mat maskImg;
 	Canny( canny_img, maskImg, 10, 30, kernel_size );
 	bitwise_not(maskImg, maskImg);
-
+	cout << canny_img.size() << endl;
 	//show images (canny mask and grayscale)
 	imshow("Mask", maskImg);
 	imshow("WebCam", bgrImage);
@@ -162,16 +182,21 @@ int main(int argc, char* argv[])
 		//take picture
 		
 		//ask camera for new picture
+#ifndef LOADINGFROMDATASET
 		system(command);
 		waitKey(30);
+#endif
 		bgrImage = imread(imageName);
+		cout << bgrImage.type() << endl;
+#ifndef LOADINGFROMDATASET		
 		resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
 		bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
+#endif
 		cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
-		
-		stringstream ss;
+
+		/*stringstream ss;
 		ss << indexPicture++;
-		imwrite(ss.str()+".png",bgrImage);
+		imwrite(ss.str()+".png",bgrImage);*/
 
 		Mat canny_img;
 		/// Reduce noise with a kernel 3x3
@@ -182,12 +207,16 @@ int main(int argc, char* argv[])
 		Canny( canny_img, canny_img, 10, 30, kernel_size );
 		Mat stripeOnlyImg;
 
+		//creating stripe mask
 		Mat stripeMaskImg(bgrImage.size(),CV_8UC1,Scalar(0));
 		int stripeMaskSize = 100;
 		stripeMaskImg.rowRange(max(0,i-stripeMaskSize),min(bgrImage.rows-1,i+stripeMaskSize)) = 1;
+		
+		//combining mask of background with stripe mask
 		Mat combinedMaskImg(bgrImage.size(),CV_8UC1,Scalar(0));
 		maskImg.copyTo(combinedMaskImg,stripeMaskImg);
 		imshow("New Mask",combinedMaskImg);
+		imshow("canny_img", canny_img);
 		canny_img.copyTo(stripeOnlyImg, combinedMaskImg);
 		
 
@@ -199,7 +228,7 @@ int main(int argc, char* argv[])
 		Mat element = getStructuringElement( morph_elem, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
 		/// Apply the specified morphology operation
-		morphologyEx( stripeOnlyImg, stripeOnlyImg, operation, element );
+		//morphologyEx( stripeOnlyImg, stripeOnlyImg, operation, element );
 
 		imshow("STRIPEONLYIMG",stripeOnlyImg);
 		waitKey(3);
@@ -212,8 +241,9 @@ int main(int argc, char* argv[])
 		double Wn = W * (nStripes * 20 - (double)i / (double)(distanceBetweenStripes + stripeSize));
 
 		//find the line
-		bitwise_not(bgrImage, bgrImage);
-		findNonZero(bgrImage, nonZeroCoordinates);
+		//bitwise_not(stripeOnlyImg, stripeOnlyImg);
+		waitKey();
+		findNonZero(stripeOnlyImg, nonZeroCoordinates);
 
 		for (int k = 0; k < nonZeroCoordinates.total(); k++) {
 
