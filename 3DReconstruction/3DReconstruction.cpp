@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 #ifndef LOADINGFROMDATASET
 	string imageName("U://My Pictures//RemotePhoto//IMG_0001.JPG"); // by default
 #else
-	string imageName("C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//53.png"); // by default
+	string imageName("C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//"); // by default
 #endif
 #
 
@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
 	bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
 	cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
 #else
-	bgrImage = imread(imageName);
+	bgrImage = imread(imageName+"0.png");
 #endif
 		
 	double projectionHeight = 30;
@@ -120,6 +120,8 @@ int main(int argc, char* argv[])
 	Ds = Ds*25.4;
 	W = W*25.4;
 
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
+
 	//set image to white to use as background to get the mask
 	imgStripe = 255; 
 	imshow("imgStripe", imgStripe);
@@ -162,6 +164,7 @@ int main(int argc, char* argv[])
 	int indexPicture = 0;
 
 	for (int i = 0; i < pHeight - stripeSize; i += (distanceBetweenStripes + stripeSize))
+	//int i = 53 * (distanceBetweenStripes + stripeSize);
 	{
 		Mat bgrImage;
 
@@ -186,8 +189,14 @@ int main(int argc, char* argv[])
 		system(command);
 		waitKey(30);
 #endif
+#ifdef LOADINGFROMDATASET
+		std::ostringstream oss;
+		oss << indexPicture++;
+		bgrImage = imread(imageName+oss.str()+".png");
+#else
 		bgrImage = imread(imageName);
-		cout << bgrImage.type() << endl;
+#endif
+
 #ifndef LOADINGFROMDATASET		
 		resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
 		bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
@@ -238,11 +247,13 @@ int main(int argc, char* argv[])
 
 		Mat nonZeroCoordinates;
 		
+		//////DEBUG
 		double Wn = W * (nStripes * 20 - (double)i / (double)(distanceBetweenStripes + stripeSize));
+		//double Wn = W * (nStripes  - 53);
 
 		//find the line
 		//bitwise_not(stripeOnlyImg, stripeOnlyImg);
-		waitKey();
+		
 		findNonZero(stripeOnlyImg, nonZeroCoordinates);
 
 		for (int k = 0; k < nonZeroCoordinates.total(); k++) {
@@ -260,19 +271,19 @@ int main(int argc, char* argv[])
 			y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
 			z.push_back((Wn*Ds) / (u*P*Dp + Wn));
 
-			//cout<<Dp<<" "<<(Dp*Ds)<<" "<<(u*P*Dp + Wn)<<endl;
+			//cout<<"Dp: "<<Dp<<" "<<" (Dp*Ds): "<<(Dp*Ds)<<" "<<"(u*P*Dp + Wn): "<<(u*P*Dp + Wn)<<endl;
 
-			//cout<<"r: "<<r<<" c: "<<c<<" u: "<<u<<" h: "<<h<<" M: "<<M<<" N: "<<N<<" Dp: "<<
-			//Dp<<" Ds: "<<Ds<<" P: "<<P<<" Wn: "<<Wn<<" x: "<<x.at(x.size()-1)<<" y: "
-			//<<y.at(x.size()-1)<<" z: "<<z.at(x.size()-1)<<endl;
+			/*cout<<"r: "<<r<<" c: "<<c<<" u: "<<u<<" h: "<<h<<" M: "<<M<<" N: "<<N<<" Dp: "<<
+			Dp<<" Ds: "<<Ds<<" P: "<<P<<" Wn: "<<Wn<<" x: "<<x.at(x.size()-1)<<" y: "
+			<<y.at(x.size()-1)<<" z: "<<z.at(x.size()-1)<<endl;*/
 
 
 		}
-		
+		waitKey();
 	}
 
 
-	string outFilename = "face3dpointcloud.pcd";
+	string outFilename = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//face3dpointcloud.pcd";
 	ofstream outFile(outFilename.c_str());
 
 	if (!outFile)
