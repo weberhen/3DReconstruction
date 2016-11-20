@@ -24,9 +24,9 @@ string imageName;
 
 Mat maskImg;
 
-double Dp, Ds, P, W;
-int Dp_slider=61, Ds_slider=1, P_slider=10, W_slider=56;
-int Dp_slider_max=100, Ds_slider_max=100, P_slider_max=100, W_slider_max=100;
+double Dp, Ds, P, W, stripeScaleFactor=.8;
+int Dp_slider=61, Ds_slider=40, P_slider=61, W_slider=56, stripeScaleFactor_slider=40;
+int Dp_slider_max=100, Ds_slider_max=100, P_slider_max=100, W_slider_max=100, stripeScaleFactor_slider_max=100;
 
 void createPointCloud(Mat &maskImg)
 {
@@ -89,7 +89,7 @@ void createPointCloud(Mat &maskImg)
 
 		//creating stripe mask
 		Mat stripeMaskImg(bgrImage.size(),CV_8UC1,Scalar(0));
-		int stripeMaskSize = 50;
+		int stripeMaskSize = 80;
 		stripeMaskImg.rowRange(max(0,i-stripeMaskSize),min(bgrImage.rows-1,i+stripeMaskSize)) = 1;
 		
 		//combining mask of background with stripe mask
@@ -123,7 +123,7 @@ void createPointCloud(Mat &maskImg)
 		Mat nonZeroCoordinates;
 		
 		//////DEBUG
-		double Wn = W * (nStripes * .8  - (double)i / (double)(distanceBetweenStripes + stripeSize));
+		double Wn = W * (nStripes * stripeScaleFactor  - (double)i / (double)(distanceBetweenStripes + stripeSize));
 		//double Wn = W * (nStripes  - 53);
 
 		//find the line
@@ -142,10 +142,15 @@ void createPointCloud(Mat &maskImg)
 			double u = r - 0.5*(M + 1.);
 			double h = c - 0.5*(N + 1.);
 
-			x.push_back(Dp - ((Dp*Ds) / (u*P*Dp + Wn)));
-			y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
-			z.push_back((Wn*Ds) / (u*P*Dp + Wn));	
-
+			//avoid adding background to pointcloud
+			if((Dp - ((Dp*Ds) / (u*P*Dp + Wn)))> -50)
+			{
+				x.push_back(Dp - ((Dp*Ds) / (u*P*Dp + Wn)));
+				y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
+				z.push_back((Wn*Ds) / (u*P*Dp + Wn));	
+	
+			}
+			
 			//cout<<"Dp: "<<Dp<<" "<<" (Dp*Ds): "<<(Dp*Ds)<<" "<<"(u*P*Dp + Wn): "<<(u*P*Dp + Wn)<<endl;
 
 			/*cout<<"r: "<<r<<" c: "<<c<<" u: "<<u<<" h: "<<h<<" M: "<<M<<" N: "<<N<<" Dp: "<<
@@ -196,31 +201,40 @@ void createPointCloud(Mat &maskImg)
 
 void on_trackbar_Dp( int, void* )
 {
-	Dp = (double) Dp_slider/Dp_slider_max  * 2000;
-	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
+	Dp = 1000 + (double) Dp_slider/Dp_slider_max  * 200;
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<" stripeScaleFactor: "<<stripeScaleFactor<<endl;
 	createPointCloud(maskImg);
 }
 
 void on_trackbar_Ds( int, void* )
 {
 	Ds = (double) Ds_slider/Ds_slider_max * 300;
-	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<" stripeScaleFactor: "<<stripeScaleFactor<<endl;
 	createPointCloud(maskImg);
 }
 
 void on_trackbar_P( int, void* )
 {
 	P = (double) P_slider/P_slider_max / 1000;
-	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<" stripeScaleFactor: "<<stripeScaleFactor<<endl;
 	createPointCloud(maskImg);
 }
 
 void on_trackbar_W( int, void* )
 {
 	W = (double) W_slider/W_slider_max * 10;
-	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<" stripeScaleFactor: "<<stripeScaleFactor<<endl;
 	createPointCloud(maskImg);
 }
+
+void on_trackbar_stripeScaleFactor( int, void* )
+{
+	stripeScaleFactor = (double) stripeScaleFactor_slider/stripeScaleFactor_slider_max * 2;
+	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<" stripeScaleFactor: "<<stripeScaleFactor<<endl;
+	createPointCloud(maskImg);
+}
+
+
 
 int main(int argc, char* argv[])
 {
@@ -337,6 +351,10 @@ int main(int argc, char* argv[])
 
 	cout<<"Dp: "<<Dp<<" Ds: "<<Ds<<" W: "<<W<<" P: "<<P<<endl;
 
+	//good results
+	//Dp: 1020 Ds: 120 W: 5.62429 P: 0.00065
+	Dp = 1030;
+
 	//set image to white to use as background to get the mask
 	imgStripe = 255; 
 	imshow("imgStripe", imgStripe);
@@ -390,6 +408,7 @@ int main(int argc, char* argv[])
 	createTrackbar( "Ds", "ImageTrackbar", &Ds_slider, Ds_slider_max, on_trackbar_Ds );
 	createTrackbar( "P", "ImageTrackbar", &P_slider, P_slider_max, on_trackbar_P );
 	createTrackbar( "W", "ImageTrackbar", &W_slider, W_slider_max, on_trackbar_W );
+	createTrackbar( "SCF", "ImageTrackbar", &stripeScaleFactor_slider, stripeScaleFactor_slider_max, on_trackbar_stripeScaleFactor );
 
  	/// Show some stuff
  	on_trackbar_Dp( Dp_slider, 0 );
