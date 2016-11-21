@@ -40,7 +40,7 @@ main ()
 	    
 	    pcl::visualization::CloudViewer viewer("Cloud Viewer");
 		
-		pcl::io::loadPCDFile ("../../3DReconstruction/build/face3dpointcloud.pcd", *cloud);    
+		pcl::io::loadPCDFile ("../../3DReconstruction/build/face3dpointcloud_inliers.pcd", *cloud);    
 	    //blocks until the cloud is actually rendered
 	    
 	    viewer.showCloud(cloud);

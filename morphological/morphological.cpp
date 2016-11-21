@@ -29,6 +29,8 @@ int main( int argc, char** argv )
   if( !src.data )
   { return -1; }
 
+bitwise_not(src,src);
+
  /// Create window
  namedWindow( window_name, CV_WINDOW_AUTOSIZE );
 

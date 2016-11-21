@@ -28,17 +28,60 @@ double Dp, Ds, P, W, stripeScaleFactor=.8;
 int Dp_slider=61, Ds_slider=40, P_slider=61, W_slider=56, stripeScaleFactor_slider=40;
 int Dp_slider_max=100, Ds_slider_max=100, P_slider_max=100, W_slider_max=100, stripeScaleFactor_slider_max=100;
 
-//given a mask taken from the scene without any stripe, the function returns only the stripe in the image
-Mat getStripe(Mat &maskImg,Mat &src)
+Mat createMask(Mat &src)
 {
 
-	////////////////////////////////
+	Mat src_gray, grad_y, abs_grad_y, grad;
 
-	//FIX THE MASK!!!!!!!!!!!!!!!!!!
+	int scale = 1;
+	int delta = 0;
+	int ddepth = CV_16S;
+	//![variables]
 
-	////////////////////////////////
+	//![reduce_noise]
+	GaussianBlur( src, src, Size(3,3), 0, 0, BORDER_DEFAULT );
+	//![reduce_noise]
 
-	Mat stripeOnlyImg,src_gray, grad_y, abs_grad_y, grad;
+	//![convert_to_gray]
+  	cvtColor( src, src_gray, COLOR_BGR2GRAY );
+  	//![convert_to_gray]
+
+	/// Gradient Y
+	Sobel( src_gray, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT );
+	//![sobel]
+
+	//![convert]
+	convertScaleAbs( grad_y, abs_grad_y );
+	//![convert]
+
+	//![blend]
+	/// Total Gradient (approximate)
+	grad = abs_grad_y.clone();
+	//![blend]
+
+  	int morph_elem = 2;
+  	int morph_operator = 1;
+	int morph_size = 6;
+
+  	// Since MORPH_X : 2,3,4,5 and 6
+  	int operation = morph_operator + 2;
+
+  	Mat element = getStructuringElement( morph_elem, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
+  	threshold( grad, grad, 60, 255,0 );
+
+  	/// Apply the specified morphology operation
+  	morphologyEx( grad, grad, operation, element );
+
+  	imshow("CORRECT MASK",grad);
+  	waitKey();
+
+  	return grad;
+}
+
+//given a mask taken from the scene without any stripe, the function returns only the stripe in the image
+Mat getStripe(Mat &maskImg, Mat &src)
+{
+	Mat src_gray, grad_y, abs_grad_y, grad;
 
 	//Apply Sobel
 
@@ -52,10 +95,6 @@ Mat getStripe(Mat &maskImg,Mat &src)
   	GaussianBlur( src, src, Size(3,3), 0, 0, BORDER_DEFAULT );
   	//![reduce_noise]
 
-  	//![convert_to_gray]
-  	//cvtColor( src, src_gray, COLOR_BGR2GRAY );
-  	//![convert_to_gray]
-
   	/// Gradient Y
   	Sobel( src, grad_y, ddepth, 0, 1, 3, scale, delta, BORDER_DEFAULT );
   	//![sobel]
@@ -65,7 +104,7 @@ Mat getStripe(Mat &maskImg,Mat &src)
   	//![convert]
 
   	grad = abs_grad_y.clone();
-  	
+	
   	grad-=maskImg;
 
   	Mat abs_grad;
@@ -84,8 +123,8 @@ Mat getStripe(Mat &maskImg,Mat &src)
   	morphologyEx( bin_grad, bin_grad, operation, element );
 
   	imshow("bin_grad",bin_grad);
-  	waitKey();
-	return stripeOnlyImg;
+  	
+	return bin_grad;
 }
 
 void createPointCloud(Mat &maskImg)
@@ -111,6 +150,7 @@ void createPointCloud(Mat &maskImg)
 		}
 
 		imshow("imgStripe", imgStripe);
+		
 #endif
 				
 		//take picture
@@ -139,16 +179,17 @@ void createPointCloud(Mat &maskImg)
 		imwrite(ss.str()+".png",bgrImage);*/
 
 		Mat originalImg = bgrImage.clone();
-		getStripe(maskImg, originalImg);
+		
+		Mat stripeOnlyImg = getStripe(maskImg, originalImg);
 
-		Mat canny_img;
+		/*Mat canny_img;
 		/// Reduce noise with a kernel 3x3
 		blur( bgrImage, canny_img, Size(3,3) );
 
 		int kernel_size = 3;
 		//// Canny detector
 		Canny( canny_img, canny_img, 10, 30, kernel_size );
-		Mat stripeOnlyImg;
+		
 
 		//creating stripe mask
 		Mat stripeMaskImg(bgrImage.size(),CV_8UC1,Scalar(0));
@@ -173,7 +214,7 @@ void createPointCloud(Mat &maskImg)
 		Mat element = getStructuringElement( morph_elem, Size( 2*morph_size + 1, 2*morph_size+1 ), Point( morph_size, morph_size ) );
 
 		/// Apply the specified morphology operation
-		morphologyEx( stripeOnlyImg, stripeOnlyImg, operation, element );
+		morphologyEx( stripeOnlyImg, stripeOnlyImg, operation, element );*/
 
 #ifndef LOADINGFROMDATASET
 		imshow("STRIPEONLYIMG",stripeOnlyImg);
@@ -442,7 +483,9 @@ int main(int argc, char* argv[])
 	cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
 #endif
 
-	Mat canny_img;
+	maskImg = createMask(bgrImage);
+
+	/*Mat canny_img;
 	/// Reduce noise with a kernel 3x3
 	blur( bgrImage, canny_img, Size(3,3) );
 
@@ -451,7 +494,7 @@ int main(int argc, char* argv[])
 	
 	
 	Canny( canny_img, maskImg, 10, 30, kernel_size );
-	bitwise_not(maskImg, maskImg);
+	bitwise_not(maskImg, maskImg);*/
 	
 #ifndef LOADINGFROMDATASET
 	//show images (canny mask and grayscale)
