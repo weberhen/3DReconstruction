@@ -1,8 +1,10 @@
-#define LOADINGFROMDATASET
 
-#ifndef LOADINGFROMDATASET
+
+//#ifndef LOADINGFROMDATASET
 	#include "stdafx.h"
-#endif
+//#endif
+
+#define LOADINGFROMDATASET 1
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -10,11 +12,12 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <assert.h>     /* assert */
 
 using namespace cv;
 using namespace std;
 
-#define USINGLINUX
+//#define USINGLINUX
 
 int stripeSize = 1;
 int distanceBetweenStripes = 8;
@@ -81,6 +84,8 @@ Mat createMask(Mat &src)
 //given a mask taken from the scene without any stripe, the function returns only the stripe in the image
 Mat getStripe(Mat &maskImg, Mat &src)
 {
+	assert(("Length can't possibly be negative! Tell jsmith", src.cols != 0));
+	cout << src.size() << endl;
 	Mat src_gray, grad_y, abs_grad_y, grad;
 
 	//Apply Sobel
@@ -172,7 +177,8 @@ void createPointCloud(Mat &maskImg)
 		resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
 		bgrImage = bgrImage.colRange(200,1000).rowRange(93,687);
 #endif
-		cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
+		if(bgrImage.channels()==3)
+			cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
 
 		/*stringstream ss;
 		ss << indexPicture++;
@@ -247,7 +253,8 @@ void createPointCloud(Mat &maskImg)
 			double h = c - 0.5*(N + 1.);
 
 			//avoid adding background to pointcloud
-			if((Dp - ((Dp*Ds) / (u*P*Dp + Wn)))> -50)
+			if((Dp - ((Dp*Ds) / (u*P*Dp + Wn)))> -140
+				&& (Dp - ((Dp*Ds) / (u*P*Dp + Wn)))<130)
 			{
 				x.push_back(Dp - ((Dp*Ds) / (u*P*Dp + Wn)));
 				y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
@@ -269,7 +276,7 @@ void createPointCloud(Mat &maskImg)
 	}
 
 #ifndef USINGLINUX
-	string outFilename = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//face3dpointcloud.pcd";
+	string outFilename = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//kettleWin2.pcd";
 #else
 	string outFilename = "face3dpointcloud.pcd"; 
 #endif
@@ -353,7 +360,7 @@ int main(int argc, char* argv[])
 	imageName = "U://My Pictures//RemotePhoto//IMG_0001.JPG"; // by default
 #else
 	#ifndef USINGLINUX
-		imageName = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//"; // by default
+		imageName = "C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//"; // by default
 	#else
 		imageName = "/home/jack/Dropbox/ULaval/1erSession/GIF7001/FinalProject/dataset/kettle/"; 
 	#endif
@@ -471,7 +478,7 @@ int main(int argc, char* argv[])
 #endif
 
 #ifndef USINGLINUX
-	bgrImage = imread("C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//dataset//kettle//0.png");
+	bgrImage = imread("C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//0.png");
 #else
 	bgrImage = imread("/home/jack/Dropbox/ULaval/1erSession/GIF7001/FinalProject/dataset/kettle/0.png"); 
 #endif
