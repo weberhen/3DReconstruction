@@ -2,7 +2,8 @@
 
 int main(int argc, char* argv[])
 {
-	imageName = "C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//"; // by default
+	//imageName = "C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//"; // by default
+	imageName = "U://Documents//_codes//3DReconstruction//_Refactor//dataset//presentation_dataset//"; // by default
 
 	char test;
 	bool testValues = false;
@@ -50,10 +51,16 @@ int main(int argc, char* argv[])
 	// W:  Width between successive stripes on the calibration plane 
 	// k:  Radial lens distortion coefficient 
 
-	Dp = 49;
-	Ds = 4.5;
-	double Dh = 24.25;
-	double Dv = 15.5;
+	//Dp = 49;
+	//Ds = 4.5;
+	//double Dh = 24.25;
+	//double Dv = 15.5;
+
+	//all in inches
+	Dp = 47;
+	Ds = 4.92126;
+	double Dh = 22.55906;
+	double Dv = 14.29134;
 
 	if (!testValues)
 	{
@@ -94,7 +101,9 @@ int main(int argc, char* argv[])
 	waitKey(3);
 
 	//get image from the camera
-	bgrImage = imread("C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//0.png");
+	//bgrImage = imread("C://Users//jack//Documents//_codes//3DReconstruction//dataset//kettle//0.png");
+	bgrImage = imread("U://Documents//_codes//3DReconstruction//_Refactor//dataset//presentation_dataset//0.png");
+	
 
 	maskImg = createMask(bgrImage);
 
@@ -103,7 +112,7 @@ int main(int argc, char* argv[])
 	/// Create Windows
 	namedWindow("ImageTrackbar", 1);
 
-	createTrackbar("Dp", "ImageTrackbar", &Dp_slider, Dp_slider_max, on_trackbar_Dp);
+	/*createTrackbar("Dp", "ImageTrackbar", &Dp_slider, Dp_slider_max, on_trackbar_Dp);
 	createTrackbar("Ds", "ImageTrackbar", &Ds_slider, Ds_slider_max, on_trackbar_Ds);
 	createTrackbar("P", "ImageTrackbar", &P_slider, P_slider_max, on_trackbar_P);
 	createTrackbar("W", "ImageTrackbar", &W_slider, W_slider_max, on_trackbar_W);
@@ -111,9 +120,10 @@ int main(int argc, char* argv[])
 
 	/// Show some stuff
 	on_trackbar_Dp(Dp_slider, 0);
+
 	on_trackbar_Ds(Ds_slider, 0);
 	on_trackbar_P(P_slider, 0);
-	on_trackbar_W(W_slider, 0);
+	on_trackbar_W(W_slider, 0);*/
 
 	//////////////////////////////////getting point cloud//////////////////////////////////
 	createPointCloud(maskImg);

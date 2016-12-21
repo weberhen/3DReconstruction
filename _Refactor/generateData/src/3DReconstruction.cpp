@@ -1,5 +1,7 @@
 #include "3DReconstruction.hpp"
 
+#include <iostream>
+
 int stripeSize = 1;
 int distanceBetweenStripes = 8;
 int nStripes = 0;
@@ -12,7 +14,7 @@ double Dp, Ds, P, W, stripeScaleFactor = .8;
 int Dp_slider = 61, Ds_slider = 40, P_slider = 61, W_slider = 56, stripeScaleFactor_slider = 40;
 int Dp_slider_max = 100, Ds_slider_max = 100, P_slider_max = 100, W_slider_max = 100, stripeScaleFactor_slider_max = 100;
 
-void createPointCloud(Mat &maskImg)
+void createDataset(string datasetName)
 {
 	int indexPicture = 0;
 
@@ -47,12 +49,13 @@ void createPointCloud(Mat &maskImg)
 		bgrImage = imread(imageName);
 
 		resize(bgrImage, bgrImage, Size(), 0.3, 0.3, INTER_NEAREST);
-		bgrImage = bgrImage.colRange(200, 1000).rowRange(93, 687);
+		//bgrImage = bgrImage.colRange(200, 1000).rowRange(93, 687);
 		cv::cvtColor(bgrImage, bgrImage, CV_BGR2GRAY);
 
 		stringstream ss;
 		ss << indexPicture++;
-		imwrite(ss.str()+".png",bgrImage);
+
+		imwrite("U://Documents//_codes//3DReconstruction//_Refactor//dataset//presentation_dataset//"+ss.str()+".png",bgrImage);
 
 		waitKey(3);
 	}

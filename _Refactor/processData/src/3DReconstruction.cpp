@@ -152,8 +152,8 @@ void createPointCloud(Mat &maskImg)
 			double h = c - 0.5*(N + 1.);
 
 			//avoid adding background to pointcloud
-			if((Dp - ((Dp*Ds) / (u*P*Dp + Wn)))> -140
-				&& (Dp - ((Dp*Ds) / (u*P*Dp + Wn)))<130)
+			//if((Dp - ((Dp*Ds) / (u*P*Dp + Wn)))> -140
+			//	&& (Dp - ((Dp*Ds) / (u*P*Dp + Wn)))<130)
 			{
 				x.push_back(Dp - ((Dp*Ds) / (u*P*Dp + Wn)));
 				y.push_back((h*P*Dp*Ds) / (u*P*Dp + Wn));
@@ -163,7 +163,8 @@ void createPointCloud(Mat &maskImg)
 		}
 	}
 
-	string outFilename = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//kettleWin2.pcd";
+	//string outFilename = "C://Users//jack//Dropbox//ULaval//1erSession//GIF7001//FinalProject//kettleWin2.pcd";
+	string outFilename = "U://Documents//_codes//3DReconstruction//_Refactor//dataset//presentation_dataset//presentation_result.pcd";
 
 	ofstream outFile(outFilename.c_str());
 

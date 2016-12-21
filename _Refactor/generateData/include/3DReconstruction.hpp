@@ -23,5 +23,5 @@ extern double Dp, Ds, P, W, stripeScaleFactor;
 extern int Dp_slider, Ds_slider, P_slider, W_slider, stripeScaleFactor_slider;
 extern int Dp_slider_max, Ds_slider_max, P_slider_max, W_slider_max, stripeScaleFactor_slider_max;
 
-void createPointCloud(Mat &maskImg);
+void createDataset(string datasetName);
 
