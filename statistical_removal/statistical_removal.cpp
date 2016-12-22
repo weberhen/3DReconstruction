@@ -12,7 +12,7 @@ main (int argc, char** argv)
   // Fill in the cloud data
   pcl::PCDReader reader;
   // Replace the path below with the path where you saved your file
-  reader.read<pcl::PointXYZ> ("../../3DReconstruction/build/face3dpointcloud.pcd", *cloud);
+  reader.read<pcl::PointXYZ> (argv[1], *cloud);
 
   std::cerr << "Cloud before filtering: " << std::endl;
   std::cerr << *cloud << std::endl;
@@ -28,11 +28,11 @@ main (int argc, char** argv)
   std::cerr << *cloud_filtered << std::endl;
 
   pcl::PCDWriter writer;
-  writer.write<pcl::PointXYZ> ("../../3DReconstruction/build/face3dpointcloud_inliers.pcd", *cloud_filtered, false);
+  writer.write<pcl::PointXYZ> ("cloud_inliers.pcd", *cloud_filtered, false);
 
   sor.setNegative (true);
   sor.filter (*cloud_filtered);
-  writer.write<pcl::PointXYZ> ("../../3DReconstruction/build/face3dpointcloud_outliers.pcd", *cloud_filtered, false);
+  writer.write<pcl::PointXYZ> ("cloud_outliers.pcd", *cloud_filtered, false);
 
   return (0);
 }
