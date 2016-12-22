@@ -1,1 +1,0 @@
-Dp: 1122 Ds: 120 W: 5.64429 P: 0.000618622 stripeScaleFactor: 0.8

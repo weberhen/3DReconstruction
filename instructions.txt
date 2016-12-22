@@ -1,0 +1,8 @@
+1) generate data
+	- IMPORTANT: change the path from "\\gel.ulaval.ca\Vision\Usagers\heweb4\" to "U":
+	- use U:\Documents\_codes\3DReconstruction\_Refactor\generateData\VS2012\VS2012.sln
+2) process data
+	- IMPORTANT: change the path from "\\gel.ulaval.ca\Vision\Usagers\heweb4\" to "U":
+	- use U:\Documents\_codes\3DReconstruction\_Refactor\processData\VS2012\VS2012.sln
+3) view results
+	- use U:\PCL 1.6.0\bin\pcd_viewer_release.exe \\gel.ulaval.ca\Vision\Usagers\heweb4\Documents\_codes\3DReconstruction\_Refactor\dataset\presentation_dataset\presentation_result.pcd
